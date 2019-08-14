@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>index</title>
+<style>
+</style>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+</head>
+<body>
+	<div id="app">
+		<div class="container">
+			<div class="block user">
+				<p>{{user}}</p>
+				<p>username: <input type="text" v-model="username"/></p>
+				<p>password: <input type="password" v-model="password" /></p>
+				<button @click="login">login</button>
+				<button @click="logout">logout</button>
+			</div>
+			<div class="block cate">
+				<p v-for="item in cates">{{item}}</p>
+				<button @click="getCate">getCate</button>
+				<p>addcatename: <input type="text" v-model="addcatename"/></p>
+				<button @click="addcate">addcate</button>
+				<p>deletecateid: <input type="text" v-model="deletecateid"/></p>
+				<button @click="deletecate">deletecate</button>
+				<p>updatecateid: <input type="text" v-model="updatecateid"/></p>
+				<p>updatecatename: <input type="text" v-model="updatecatename"/></p>
+				<button @click="updatecate">updatecate</button>
+			</div>
+			<div class="block foto">
+				<p v-for="item in fotos">{{item}}</p>
+				<p>getfotobycateid: <input type="text" v-model="getfotobycateid"/></p>
+				<button @click="getFotos(getfotobycateid)">getfoto</button>
+				<!--
+				<p>addfotoname: <input type="text" v-model="addfotoname"/></p>
+				<p>addfotocateid: <input type="text" v-model="addfotocateid"/></p>
+				<button @click="addfoto">addfoto</button>
+				-->
+				<p>deletefotoid: <input type="text" v-model="deletefotoid"/></p>
+				<button @click="deletefoto">deletefoto</button>
+				<p>updatefotoid: <input type="text" v-model="updatefotoid"/></p>
+				<p>updatefotoname: <input type="text" v-model="updatefotoname"/></p>
+				<button @click="updatefoto">updatefoto</button>
+				<br>
+				<br>
+				<p>uploadfotocateid: <input type="text" v-model="uploadfotocateid"/></p>
+				<input
+		          type="file"
+		          ref="file"
+		          multiple
+		          accept="image/gif, image/jpeg, image/png, image/jpg"
+		        >
+  				<button @click="upload">upload</button>
+				
+			</div>
+		</div>
+	</div>
+	<script>
+		var app = new Vue({
+			el: '#app',
+			data: {
+				user: 'no login',
+				username: '',
+				password: '',
+				
+				cates: [],
+				addcatename: '',
+				deletecateid: '',			
+				updatecatename: '',
+				updatecateid: '',
+				
+				fotos: [],
+				addfotoname: '',
+				addfotocateid: '',
+				deletefotoid: '',			
+				updatefotoname: '',
+				updatefotoid: '',
+				getfotobycateid: '',
+				uploadfotocateid: ''
+				
+			},
+			created() {
+				console.log(this)
+				this.getCate();
+				this.login();
+			},
+			methods: {
+				// user
+			    login() {
+			    	console.log("login")
+			        axios.post("user/login", {
+			        	username: this.username,
+		            	password: this.password
+		        	})
+		        	.then((response) => {
+						console.log(response);
+						if(response.data.status == 200){
+							this.user = response.data.data;
+						}
+					})
+					.catch((error) => {
+						console.log(error);
+					});
+			    },
+			    logout() {
+			    	console.log("logout")
+			        axios.get("user/logout")
+		        	.then((response) => {
+						console.log(response);
+						if(response.data.status == 200){
+							this.user = "";
+						}
+					})
+					.catch(function (error) {
+						console.log(error);
+					});
+			    },
+			    // cate
+			    getCate() {
+			    	axios.get("cate/all")
+		        	.then((response) => {
+						console.log(response);
+						this.cates = response.data.data;
+						if(this.cates.length > 0){
+							this.getFotos(this.cates[0]._id);
+						}
+					})
+					.catch((error) => {
+						console.log(error);
+					});
+			    },
+			    addcate() {
+			    	console.log("addcate")
+			        axios.post("cate/add", {
+			        	name: this.addcatename,
+		        	})
+		        	.then(function (response) {
+						console.log(response);
+					})
+					.catch(function (error) {
+						console.log(error);
+					});;
+			    },
+			    deletecate() {
+			    	console.log("deletecate")
+			        axios.post("cate/delete", {
+			        	id: this.deletecateid,
+		        	})
+		        	.then(function (response) {
+						console.log(response);
+					})
+					.catch(function (error) {
+						console.log(error);
+					});
+			    },
+			    updatecate() {
+			    	console.log("updatecate")
+			        axios.post("cate/update", {
+			        	id: this.updatecateid,
+			        	name: this.updatecatename
+		        	})
+		        	.then(function (response) {
+						console.log(response);
+					})
+					.catch(function (error) {
+						console.log(error);
+					});;
+			    },
+			    // foto
+			    getFotos(cateId) {
+			    	axios.get("foto/findByCateId", {
+		    		    params: {
+				    		cateId: cateId
+		    		    }
+			    	})
+		        	.then((response) => {
+						console.log(response);
+						this.fotos = response.data.data;
+					})
+					.catch((error) => {
+						console.log(error);
+					});
+			    },
+			    addfoto() {
+			    	console.log("addfoto")
+			        axios.post("foto/add", {
+			        	name: this.addfotoname,
+			        	cateId: this.addfotocateid,
+		        	})
+		        	.then(function (response) {
+						console.log(response);
+					})
+					.catch(function (error) {
+						console.log(error);
+					});;
+			    },
+			    deletefoto() {
+			    	console.log("deletefoto")
+			        axios.post("foto/delete", {
+			        	id: this.deletefotoid,
+		        	})
+		        	.then(function (response) {
+						console.log(response);
+					})
+					.catch(function (error) {
+						console.log(error);
+					});;
+			    },
+			    updatefoto() {
+			    	console.log("updatefoto")
+			        axios.post("foto/update", {
+			        	id: this.updatefotoid,
+			        	name: this.updatefotoname
+		        	})
+		        	.then(function (response) {
+						console.log(response);
+					})
+					.catch(function (error) {
+						console.log(error);
+					});;
+			    },
+			    upload(){
+			    	const UPLOAD = {
+	    			  MAX_HEIGHT: 400,
+	    			  MAX_WIDTH: 400
+	    			};
+			        var files = this.$refs.file.files;
+			        console.log(files);
+			        var pArr = [];
+			        for (let i = 0; i < files.length; i++) {
+			          var p = new Promise(resolve => {
+			            var filename = files[i].name;
+			            var reader = new FileReader();
+			            reader.onloadend = e => {
+			              let data = e.target.result;
+			              console.log(files[i]);
+			              let img = new Image();
+			              img.src = data;
+			              img.style.position = "absolute";
+			              img.style.top = "-9999px";
+			              img.style.visibility = "hidden";
+			              document.body.append(img);
+			              this.$nextTick(() => {
+			                console.log(img.height);
+			                console.log(img.width);
+			                let h1, w1, h2, w2, height, width;
+			                if (img.height > UPLOAD.MAX_HEIGHT) {
+			                  h1 = UPLOAD.MAX_HEIGHT;
+			                  w1 = (UPLOAD.MAX_HEIGHT / img.height) * img.width;
+			                }
+			                if (img.width > UPLOAD.MAX_WIDTH) {
+			                  w2 = UPLOAD.MAX_WIDTH;
+			                  h2 = (UPLOAD.MAX_WIDTH / img.width) * img.height;
+			                }
+			                // 长宽均超标
+			                if (h1 && w2) {
+			                  if (h1 < h2) {
+			                    height = h1;
+			                    width = w1;
+			                  } else {
+			                    height = h2;
+			                    width = w2;
+			                  }
+			                }
+			                // 长宽有一超标或均未超标
+			                else {
+			                  height = h1 || h2 || img.height;
+			                  width = w1 || w2 || img.width;
+			                }
+			                console.log("hw", height, width);
+			                var canvas = document.createElement("canvas");
+			                var context = canvas.getContext("2d");
+			                canvas.width = width;
+			                canvas.height = height;
+			                context.drawImage(img, 0, 0, width, height);
+			                canvas.toBlob(blob => {
+			                  resolve({ blob: blob, filename: filename });
+			                });
+			              });
+			            };
+			            reader.readAsDataURL(files[i]);
+			          });
+			          pArr.push(p);
+			        }
+			        Promise.all(pArr).then(result => {
+			          console.log(result);
+			          let fd = new FormData(); //创建form对象
+			          fd.append("cateId", this.uploadfotocateid);
+			          for (let i = 0; i < result.length; i++) {
+			            fd.append("foto", result[i].blob, result[i].filename); //通过append向form对象添加数据
+			          }
+			          let config = {
+			            headers: { "Content-Type": "multipart/form-data" }
+			          }; //添加请求头
+			          console.log("fd", fd)
+			          let url = "foto/upload";
+			          axios
+			            .post(url, fd, config)
+			            .then(response => {
+			              console.log(response.data);
+			              //this.$refs.message.alert("Upload success");
+			              //this.$refs.dialogUpload.close();
+			              //this.getCates();
+			            })
+			            .catch(error => {
+			              console.log(error);
+			            });
+			        });
+			    }
+			}
+		})
+	</script>
+</body>
+<style>
+.container {
+	display: flex;
+}
+.block {
+	margin: 20px;
+}
+</style>
+</html>
