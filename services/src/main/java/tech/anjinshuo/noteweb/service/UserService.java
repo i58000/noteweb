@@ -14,30 +14,31 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
     
-    public Response login(String username, String password) {
-    	Response resp = new Response();
+    public int login(String username, String password) {
     	// 0 success
-    	// 1 no username, auto login but fail
+    	// 1 no username
     	// 2 wrong password
     	// 3 username no exist
-    	try {
-    		if ("".equals(username) || null == username || "".equals(password) || null == password) {
-        		// no username, auto login but fail
-    			return resp.fail(1, "try auto login");
-    		} 
-    		List<User> list = this.userRepository.findByUsername(username);
-        	if (0 == list.size()) {
-        		// username no exist
-        		return resp.fail(3, "username no exist");
-        	}
-    		if (!list.get(0).getPassword().equals(password)){
-    			// wrong password
-    			return resp.fail(2, "wrong password");
-    		}
-    		// success
-			return resp.success(0);
-    	} catch(Exception e){
-    		return resp.exception(e.getMessage());
+    	
+		if ("".equals(username) || null == username || "".equals(password) || null == password) {
+    		// no username, auto login but fail
+			return 1;
+		} 
+		List<User> list = this.userRepository.findByUsername(username);
+    	if (0 == list.size()) {
+    		// username no exist
+    		return 3;
     	}
+		if (!list.get(0).getPassword().equals(password)){
+			// wrong password
+			return 2;
+		}
+		// success
+		return 0;
+    }
+    public String getNoteId(String username) {
+    	User userEntity = userRepository.findByUsername(username).get(0);
+    	String noteId = userEntity.getNoteId();
+		return noteId;
     }
 }

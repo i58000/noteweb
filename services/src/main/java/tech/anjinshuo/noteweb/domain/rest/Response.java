@@ -15,7 +15,6 @@ public class Response implements Serializable {
 	
 	public enum Header {
 		SUCCESS		(200, "SUCCESS"),
-//		SUCCESS_1	(201, "SUCCESS_1"),
 		FAIL		(222, "FAIL"),
 		EXCEPTION	(500, "EXCEPTION"),
 		NOCONTENT	(204, "NO CONTENT"),

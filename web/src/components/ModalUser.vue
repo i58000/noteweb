@@ -21,7 +21,7 @@
       </div>
     </div>
     <div v-if="!username" class="container-login">
-      <input v-model="input_username" type="text" placeholder="USERNAME" spellcheck="false"/>
+      <input v-model="input_username" type="text" placeholder="USERNAME" spellcheck="false" />
       <input v-model="input_password" type="password" placeholder="PASSWORD" />
       <button @click="onClickLogin">
         <svg
@@ -100,12 +100,16 @@ export default {
       this.login({
         username: this.input_username,
         password: this.input_password
-      }).then(() => {
-        this.init(true);
-        setTimeout(() => {
-          this.$emit("close");
-        }, 2000);
-      });
+      })
+        .then(() => {
+          this.init();
+          setTimeout(() => {
+            this.$emit("close");
+          }, 2000);
+        })
+        .catch(res => {
+          console.log("login fail", res);
+        });
     },
     onClickLogout() {
       console.log("onClickLogout");

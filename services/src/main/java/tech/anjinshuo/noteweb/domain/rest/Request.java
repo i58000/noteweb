@@ -15,10 +15,7 @@ public class Request implements Serializable{
 	 * 
 	 */
 
-	private String name;
-	private String id;
-	private String cateId;
+	private String noteId;
 	private String username;
 	private String password;
-	private Boolean isMobile;
 }

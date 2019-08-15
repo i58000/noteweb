@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import tech.anjinshuo.noteweb.domain.rest.Request;
 import tech.anjinshuo.noteweb.domain.rest.Response;
 import tech.anjinshuo.noteweb.mongo.entity.Track;
-import tech.anjinshuo.noteweb.service.TrackService;
 import tech.anjinshuo.noteweb.service.UserService;
 
 @RestController
@@ -31,48 +30,21 @@ public class UserController {
 	private HttpSession session;
     @Autowired
     private UserService userService;
-    @Autowired
-    private TrackService trackService;
 	
     @PostMapping("/login")
 	public Response login(@RequestBody Request req) {
-    	Response resp = userService.login(req.getUsername(), req.getPassword());
+    	Response resp = new Response();
+    	String username = req.getUsername();
+    	String password = req.getPassword();
+    	int code = userService.login(username, password);
     	// login success
-    	if (Response.Header.SUCCESS.STATUS == resp.getStatus()) {
+    	if (0 == code) {
     		// session
-    		session.setAttribute("username", req.getUsername());
-    		Map<String, String> map = new HashMap<String, String>();
-    		map.put("username", req.getUsername());
-    		map.put("ip", getClientIp());
-    		
-    		// track
-    		Track trackEntity = Track.fromLogin("200", getClientIp(), "login success", req.getIsMobile());
-    		trackService.insert(trackEntity);
-    		
-    		return resp.success(map);
+    		session.setAttribute("username", username);
+    		return resp.success(username);
     	}
-    	if (Response.Header.FAIL.STATUS == resp.getStatus()) {
-    		// no username, auto login
-    		if((int) resp.getData() == 1){
-    			String usernameInSession = (String) session.getAttribute("username");
-        		if(null != usernameInSession){
-            		Map<String, String> map = new HashMap<String, String>();
-        			map.put("username", req.getUsername());
-            		map.put("ip", getClientIp());
-            		
-            		// track
-            		Track trackEntity = Track.fromLogin("2000", getClientIp(), "auto login success", req.getIsMobile());
-            		trackService.insert(trackEntity);
-            		
-            		return resp.success(map);
-        		} else {
-        			// track
-            		Track trackEntity = Track.fromLogin("201", getClientIp(), "auto login fail, pv", req.getIsMobile());
-            		trackService.insert(trackEntity);
-        			
-            		return resp.success(201, "try auto login, but fail", getClientIp());
-        		}
-    		}
+    	else {
+    		resp.fail(code);
     		
     	}
 	    return resp;
@@ -88,7 +60,7 @@ public class UserController {
     		session.setAttribute("username", null);
     		return resp.success(0);
     	} else {
-    		return resp.success(1);
+    		return resp.fail(1, "no username in session");
     	}
 	}
     

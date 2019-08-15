@@ -21,5 +21,8 @@ public class User {
     
     @Field
     private String password;
+    
+    @Field
+    private String noteId;
 }
 

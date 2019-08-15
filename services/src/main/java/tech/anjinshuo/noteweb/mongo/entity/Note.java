@@ -10,14 +10,19 @@ import lombok.Data;
 
 @Data
 @Document
-public class Cate {
+public class Note {
 
     @Id
     private ObjectId _id = new ObjectId();
 
     @Field
-    @Indexed(unique = true)
-    private String name;
+    private String title;
+    
+    @Field
+    private String content;
+    
+    @Field
+    private String username;
     
     public String get_id() {
 		return _id.toString();

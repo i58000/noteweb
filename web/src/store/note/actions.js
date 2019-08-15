@@ -3,16 +3,20 @@ import API from "../../api";
 import Util from "../../util";
 
 export default {
-    init({ commit, dispatch }, debug) {
+    init({ commit, dispatch, state }) {
         return new Promise(resolve => {
-            API.init(debug).then(res => {
+            API.init().then(res => {
                 console.log("action init", res);
                 commit(types.SET_INIT, true);
                 commit(types.SET_USERNAME, res.username);
                 if (res.username) {
                     commit(types.SET_NOTE_LIST, res.titleList);
                     // commit(types.SET_NOTE_ID, res.noteId);
-                    dispatch("setNoteId", res.noteId);
+                    let noteId = res.noteId;
+                    if (!noteId) {
+                        noteId = state.noteList[0] && state.noteList[0]._id;
+                    }
+                    dispatch("setNoteId", noteId);
                 }
                 resolve(res.username);
             });
@@ -94,7 +98,7 @@ export default {
                 content: "content"
             });
             commit(types.SET_NOTE_ID, vid);
-            API.addNote(vid).then(res => {
+            API.addNote().then(res => {
                 console.log("action addNote res", res);
                 commit(types.ADD_NOTE_SET_ID, {
                     vid: vid,
@@ -112,6 +116,7 @@ export default {
             API.delNote(noteId).then(res => {
                 console.log("action delNote res", res);
                 commit(types.DEL_NOTE, noteId);
+                commit(types.SET_CONTENT, noteId);
                 resolve();
             });
         });
