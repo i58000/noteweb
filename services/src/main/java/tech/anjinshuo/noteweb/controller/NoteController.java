@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import tech.anjinshuo.noteweb.domain.rest.Request;
-import tech.anjinshuo.noteweb.domain.rest.RequestSync;
 import tech.anjinshuo.noteweb.domain.rest.Response;
 import tech.anjinshuo.noteweb.service.NoteService;
 import tech.anjinshuo.noteweb.util.permission.CheckPermission;
