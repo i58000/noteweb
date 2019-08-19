@@ -41,6 +41,7 @@ public class UserController {
     	if (0 == code) {
     		// session
     		session.setAttribute("username", username);
+    		session.setMaxInactiveInterval(1296000);
     		return resp.success(username);
     	}
     	else {

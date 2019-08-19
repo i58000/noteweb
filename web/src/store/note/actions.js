@@ -17,6 +17,7 @@ export default {
                         noteId = state.noteList[0] && state.noteList[0]._id;
                     }
                     dispatch("setNoteId", noteId);
+                    commit(types.SET_OLD_NOTE_ID, noteId);
                 }
                 resolve(res.username);
             });
@@ -35,46 +36,41 @@ export default {
             });
         }
     },
-    sync({ commit, state }) {
-        let changedNoteList = state.noteList.filter(x => {
-            if (x.$sync) {
-                return x;
+    sync({ commit, state, getters }) {
+        // debugger
+        return new Promise((resolve, reject) => {
+            let data = getters.syncItems;
+            if (data.length !== 0) {
+                commit(types.SYNC_START);
+                API.sync(data)
+                    .then(res => {
+                        // console.log(
+                        //     "haha",
+                        //     Util.applyDiff(changedNoteList[0].$sync.oldContent, res[0].diff)
+                        // );
+                        console.log("action api sync res", res);
+                        commit(types.SYNC_SUCCESS, res);
+                        resolve();
+                    })
+                    .catch(e => {
+                        console.log("action api sync catch", e);
+                        reject(e);
+                    });
             }
         });
-        console.log(state, changedNoteList);
-        let data = [];
-        changedNoteList.forEach(element => {
-            let newTitle = element.$sync.oldTitle ? element.title : undefined;
-            let diff = element.$sync.oldContent
-                ? Util.diff(element.$sync.oldContent, element.content)
-                : undefined;
-            console.log("----", newTitle, diff);
-            data.push({
-                _id: element._id,
-                newTitle,
-                diff
-            });
-        });
-        if (data.length !== 0) {
-            API.sync(data).then(res => {
-                // console.log(
-                //     "haha",
-                //     Util.applyDiff(changedNoteList[0].$sync.oldContent, res[0].diff)
-                // );
-                if (res == "ok") {
-                    commit(types.SYNC_SUCCESS);
-                }
-            });
-        }
     },
     login({ commit }, { username, password }) {
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
             console.log("action login", username, password);
-            API.login(username, password).then(res => {
-                console.log("action login res", res);
-                commit(types.SET_USERNAME, username);
-                resolve();
-            });
+            API.login(username, password)
+                .then(res => {
+                    console.log("action login res", res);
+                    commit(types.SET_USERNAME, username);
+                    resolve();
+                })
+                .catch(errcode => {
+                    reject(errcode);
+                });
         });
     },
     logout({ commit }) {
@@ -94,19 +90,23 @@ export default {
             let vid = "vid_" + new Date().getTime();
             commit(types.ADD_NOTE, {
                 _id: vid,
-                title: "title",
-                content: "content"
+                title: "",
+                content: ""
             });
             commit(types.SET_NOTE_ID, vid);
-            API.addNote().then(res => {
-                console.log("action addNote res", res);
-                commit(types.ADD_NOTE_SET_ID, {
-                    vid: vid,
-                    noteId: res
+            API.addNote()
+                .then(res => {
+                    console.log("action addNote res", res);
+                    commit(types.ADD_NOTE_SET_ID, {
+                        vid: vid,
+                        noteId: res
+                    });
+                    commit(types.SET_NOTE_ID, res);
+                    resolve();
+                })
+                .catch(err => {
+                    reject(RangeError);
                 });
-                commit(types.SET_NOTE_ID, res);
-                resolve();
-            });
         });
     },
     delNote({ commit, state }, index) {
@@ -115,8 +115,11 @@ export default {
             console.log("action delNote", index, noteId);
             API.delNote(noteId).then(res => {
                 console.log("action delNote res", res);
-                commit(types.DEL_NOTE, noteId);
-                commit(types.SET_CONTENT, noteId);
+                if (0 == res) {
+                    // debugger
+                    commit(types.DEL_NOTE, noteId);
+                    commit(types.SET_NOTE_ID, null);
+                }
                 resolve();
             });
         });

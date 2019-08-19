@@ -40,7 +40,9 @@ import Modal from "./Modal";
 import ModalUser from "./ModalUser";
 import ModalDel from "./ModalDel";
 
-import { mapActions, mapState } from "vuex";
+import { mapActions, mapState, mapGetters } from "vuex";
+
+import Util from "../util";
 
 export default {
   components: {
@@ -55,18 +57,84 @@ export default {
   data() {
     return {
       modalActive: "N",
-      indexDel: -1
+      indexDel: -1,
+      syncTimeInterval: null,
+      syncInputInterval: null
     };
   },
   watch: {
-    // init_flag() {
-    //   console.log("++++++++++++++++++++++++++++++");
-    // }
+    syncItems() {
+      if (!this.syncConfig.onInput) return;
+      console.log("time:", new Date().getTime() - this.syncTime);
+      let timeout =
+        this.syncConfig.inputInterval - (new Date().getTime() - this.syncTime);
+      console.log("timeout:", timeout);
+
+      if (
+        !this.syncInputInterval &&
+        Util.checkSyncReady(this.syncItems, this.syncConfig.inputCount)
+      ) {
+        this.syncInputInterval = setTimeout(
+          () => {
+            this.syncInputInterval = null;
+            this.sync()
+              .then(() => {
+                this.$notification.success({
+                  message: "自动同步成功",
+                  description:
+                    new Date(this.syncTime).toLocaleString() +
+                    " [ 输入检测同步 ]"
+                });
+              })
+              .catch(e => {
+                this.$notification.error({
+                  message: "同步失败",
+                  description: e
+                });
+              });
+          },
+          timeout < 0 ? 0 : timeout
+        );
+      }
+    },
+    username() {
+      console.log("=======================================", this.username);
+
+      if (!this.username) {
+        clearInterval(this.syncTimeInterval);
+        this.syncTimeInterval = null;
+        this.modalActive = "USER";
+      } else {
+        if (this.syncConfig.onTimeInterval) {
+          this.syncTimeInterval = setInterval(() => {
+            this.sync()
+              .then(() => {
+                this.$notification.success({
+                  message: "自动同步成功",
+                  description:
+                    new Date(this.syncTime).toLocaleString() + " [ 定时同步 ]"
+                });
+              })
+              .catch(e => {
+                this.$notification.error({
+                  message: "同步失败",
+                  description: e
+                });
+              });
+          }, this.syncConfig.timeInterval); // 10min = 600000
+        }
+      }
+    }
   },
   computed: {
     ...mapState("note", {
       username: state => state.username,
-      init_flag: state => state.init
+      init_flag: state => state.init,
+      syncTime: state => state.syncTime,
+      syncConfig: state => state.syncConfig
+    }),
+    ...mapGetters("note", {
+      syncItems: "syncItems"
     })
   },
   created() {
@@ -77,9 +145,17 @@ export default {
         this.modalActive = "USER";
       }
     });
+    window.onbeforeunload = () => {
+      console.log(this.syncItems.length);
+      if (this.syncItems.length == 0) {
+        // do unload
+      } else {
+        this.sync();
+      }
+    };
   },
   methods: {
-    ...mapActions("note", ["init"]),
+    ...mapActions("note", ["init", "sync"]),
     onClickCloseModal() {
       if (this.username) {
         this.modalActive = "N";

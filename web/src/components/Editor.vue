@@ -2,7 +2,7 @@
   <div class="editor">
     <div class="input">
       <!-- <UnderlineContainer :active="isFocus" position="top" :hoverable="false"> -->
-      <textarea v-if="content" @focus="onFocus" @blur="onBlur" v-model="content" spellcheck="false"></textarea>
+      <textarea v-if="content !== undefined" @focus="onFocus" @blur="onBlur" v-model="content" spellcheck="false"></textarea>
       <div v-if="content === undefined" class="loading-container">
         <div class="box">
           <div class="loading loader-13"></div>

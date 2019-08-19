@@ -20,7 +20,7 @@
         </svg>
       </div>
     </div>
-    <div v-if="!username" class="container-login">
+    <div v-if="!username" class="container-login" @keydown.enter="onClickLogin">
       <input v-model="input_username" type="text" placeholder="USERNAME" spellcheck="false" />
       <input v-model="input_password" type="password" placeholder="PASSWORD" />
       <button @click="onClickLogin">
@@ -77,11 +77,9 @@
 </template>
 
 <script>
-// import Modal from "./Modal";
 import { mapState, mapActions } from "vuex";
 
 export default {
-  // components: { Modal },
   data() {
     return {
       input_username: null,
@@ -102,13 +100,26 @@ export default {
         password: this.input_password
       })
         .then(() => {
-          this.init();
-          setTimeout(() => {
-            this.$emit("close");
-          }, 2000);
+          this.$emit("close");
+          this.init().then(username => {
+            this.$message.success("Login success: " + username);
+          });
         })
-        .catch(res => {
-          console.log("login fail", res);
+        .catch(errcode => {
+          console.log("login fail", errcode);
+          let errmsg;
+          switch (errcode) {
+            case 1:
+              errmsg = "no username/password";
+              break;
+            case 2:
+              errmsg = "wrong password";
+              break;
+            case 3:
+              errmsg = "username no exist";
+              break;
+          }
+          this.$message.error(errmsg);
         });
     },
     onClickLogout() {

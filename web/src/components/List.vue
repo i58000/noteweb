@@ -4,7 +4,7 @@
       <li v-for="(item, index) in titleList" :key="index" @click="onClickItem(index)">
         <UnderlineContainer :dark="true" :active="noteId == item._id">
           <div class="row">
-            <span class="nowrap">{{ item.title }}</span>
+            <span class="nowrap">{{ item.title || "* NO TITLE" }}</span>
             <span v-if="showDel(index)" class="del" @click="onClickDel(index)">
               <div class="del-btn">
                 <svg

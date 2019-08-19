@@ -1,6 +1,6 @@
 <template>
   <div class="title">
-    <div class="input" v-if="title">
+    <div class="input" v-if="title !== undefined">
       <UnderlineContainer :active="isFocus" v-show="noteId">
         <input type="text" @blur="onBlur" @focus="onFocus" v-model="title" spellcheck="false" />
       </UnderlineContainer>

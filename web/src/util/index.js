@@ -11,7 +11,7 @@ export default {
         });
         return result;
     },
-    applyDiff(oldStr, diff) {
+    applyDiff: (oldStr, diff) => {
         let lines = oldStr.split("\n");
         let li = 0;
         for (let di = 0; di < diff.length; di++) {
@@ -28,5 +28,24 @@ export default {
         }
         let newStr = lines.join("\n");
         return newStr;
+    },
+    checkSyncReady: (syncItems, inputCount) => {
+        let count = 0;
+        syncItems.forEach(item => {
+            // content变化
+            if (item.diff) {
+                item.diff.forEach(d => {
+                    // 是增或删
+                    if (d.removed || d.added) {
+                        count += d.count;
+                    }
+                });
+            } else {
+                // title、noteId变化
+                count++;
+            }
+        });
+        console.log("checkSyncReady count", count);
+        return count > inputCount;
     }
 };

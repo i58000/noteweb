@@ -2,7 +2,6 @@ package tech.anjinshuo.noteweb.controller;
 
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -10,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,7 +32,7 @@ public class NoteController {
     private NoteService noteService;
     
     @PostMapping("/add")
-    @CheckPermission
+    @CheckPermission(type="addNote")
 	public Response add() {
     	Response resp = new Response();
     	String username = (String) session.getAttribute("username");
@@ -54,11 +52,12 @@ public class NoteController {
 	}
     
     @PostMapping("/sync")
-    @CheckPermission
+    @CheckPermission(type="sync")
 	public Response sync(@SuppressWarnings("rawtypes") @RequestBody ArrayList<Map> req) {
     	Response resp = new Response();
-    	int code = noteService.sync(req);
-
+    	String username = (String) session.getAttribute("username");
+    	String noteId = noteService.sync(req, username);
+    	resp.success(noteId);
 	    return resp;
 	}
     

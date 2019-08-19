@@ -5,6 +5,7 @@ import Vue from "vue";
 export default {
     [types.SET_INIT](state, data) {
         state.init = data;
+        state.syncTime = new Date().getTime();
     },
     [types.SET_USERNAME](state, data) {
         state.username = data;
@@ -15,7 +16,11 @@ export default {
     [types.SET_NOTE_ID](state, data) {
         state.noteId = data;
     },
+    [types.SET_OLD_NOTE_ID](state, data) {
+        state.oldNoteId = data;
+    },
     [types.SET_TITLE](state, { noteId, title }) {
+        // debugger
         let index = state.noteList.findIndex(x => x._id == noteId);
         // let index = getters.noteIndex(state);
         // sync flag
@@ -53,10 +58,18 @@ export default {
 
         Vue.set(state.noteList[index], "content", content);
     },
-    [types.SYNC_SUCCESS](state) {
+    [types.SYNC_START](state) {
+        state.syncing = true;
+        state.syncTime = new Date().getTime();
+    },
+    [types.SYNC_SUCCESS](state, noteId) {
         state.noteList.map(x => {
             Vue.delete(x, "$sync");
         });
+        if (noteId) {
+            state.oldNoteId = noteId;
+        }
+        state.syncing = false;
     },
 
     [types.ADD_NOTE](state, note) {
@@ -72,6 +85,5 @@ export default {
         let index = state.noteList.findIndex(x => x._id == noteId);
         Vue.delete(state.noteList, index);
         // delete state.noteList.find(x => x._id == noteId);
-
     }
 };
