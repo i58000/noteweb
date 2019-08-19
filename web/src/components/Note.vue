@@ -216,16 +216,16 @@ export default {
 }
 #title {
   height: 10%;
-  /* width: 100%; */
-  width: calc(100%-40px);
+  width: 100%;
+  /* width: calc(100%-40px); */
   min-height: 40px;
   max-height: 60px;
 }
 #editor {
   margin-top: -1px;
   height: calc(100% - 10%);
-  /* width: 100%; */
-  width: calc(100%-40px);
+  width: 100%;
+  /* width: calc(100%-40px); */
   max-height: calc(100% - 40px);
   min-height: calc(100% - 60px);
 }
